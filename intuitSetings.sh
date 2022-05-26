@@ -1,4 +1,7 @@
 #!/bin/bash
+echo "disable swap"
+sudo swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 sudo apt-get update -y
 sudo apt-get install -y \
@@ -44,13 +47,27 @@ echo "Docker Runtime Configured Successfully"
 echo "make vagrant no sudo for docker"
 sudo usermod -aG docker vagrant
 
+echo "Install Kubeadm & Kubelet & Kubectl on all Nodes"
+#Install the required dependencies
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+#Add the GPG key and apt repository
+
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+#Update apt and install kubelet, kubeadm and kubectl
+
+sudo apt-get update -y
+sudo apt-get install -y kubelet kubeadm kubectl
+
 echo "install git"
 sudo apt-get install git
 
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
+install minikube-linux-amd64 /usr/local/bin/minikube
 
-sudo minikube start
-
-sudo minikube kubectl -- get po -A
+minikube start
